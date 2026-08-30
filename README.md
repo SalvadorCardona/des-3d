@@ -23,14 +23,16 @@ npm install
 npm run dev        # http://localhost:5173
 npm run typecheck  # tsc --noEmit, mode strict
 npm run build      # bundle web, base /des-3d/
-npm run verify     # rejoue 600 lancers hors navigateur (RUNS=5000 pour serrer)
+npm run verify     # rejoue 600 lancers hors navigateur (RUNS=5000 SEED=7 pour serrer)
 ```
 
 `npm run verify` est le vrai test du jeu. Il reconstruit le monde physique sans
 navigateur et contrôle trois choses qu'un lancer isolé ne montre pas : qu'aucun
 dé ne reste bloqué en l'air, qu'aucun ne sort du tapis, et que les six faces
 sortent à la même fréquence (khi-deux à 5 degrés de liberté, rejet au-delà de
-20,5). La CI le lance sur 2000 lancers à chaque push.
+20,5). Le tirage est déterministe : à graine égale le verdict est reproductible,
+donc la CI échoue sur une vraie régression, jamais par hasard. Elle le lance sur
+2000 lancers à chaque push.
 
 ## Applications natives
 

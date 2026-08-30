@@ -7,8 +7,11 @@
  *   2. aucun dé ne sort du tapis ;
  *   3. les six faces sortent à la même fréquence (test du khi-deux).
  *
- *   node scripts/verify-physics.mts        # 600 lancers
- *   RUNS=5000 node scripts/verify-physics.mts
+ *   node scripts/verify-physics.mts               # 600 lancers
+ *   RUNS=5000 SEED=7 node scripts/verify-physics.mts
+ *
+ * Le tirage est déterministe : à graine égale, le verdict est reproductible.
+ * Une régression fait donc échouer la CI de façon stable, jamais par hasard.
  */
 import RAPIER from '@dimforge/rapier3d-compat'
 import * as THREE from 'three'
@@ -22,6 +25,8 @@ const WALL_HALF_HEIGHT = 4
 const SPAWN_MIN_Y = 2.6
 const SPAWN_STAGGER = 0.55
 const SPAWN_MARGIN = 1.2
+const LINEAR_DAMPING = 0.2
+const ANGULAR_DAMPING = 0.5
 const FIXED_STEP = 1 / 60
 const STILL_LINEAR = 0.08
 const STILL_ANGULAR = 0.15
@@ -29,6 +34,20 @@ const STILL_DWELL = 0.3
 const ROLL_TIMEOUT = 8
 
 const RUNS = Number(process.env.RUNS ?? 600)
+const SEED = Number(process.env.SEED ?? 1)
+
+/** mulberry32 : générateur court et reproductible, branché à la place de Math.random. */
+function seeded(seed: number) {
+  let a = seed >>> 0
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0
+    let t = Math.imul(a ^ (a >>> 15), 1 | a)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}
+Math.random = seeded(SEED)
+
 // Valeur critique du khi-deux à 5 degrés de liberté, seuil 0,1 % : un jeu
 // équitable ne dépasse ce seuil qu'une fois sur mille.
 const CHI2_CRITICAL = 20.515
@@ -64,11 +83,14 @@ function roll(count: number, halfWidth: number) {
 
   for (let i = 0; i < count; i++) {
     const body = world.createRigidBody(
-      RAPIER.RigidBodyDesc.dynamic().setTranslation(
-        (i - (count - 1) / 2) * spread,
-        SPAWN_MIN_Y + i * SPAWN_STAGGER + rand(0, 0.3),
-        rand(-1.2, 1.2),
-      ),
+      RAPIER.RigidBodyDesc.dynamic()
+        .setTranslation(
+          (i - (count - 1) / 2) * spread,
+          SPAWN_MIN_Y + i * SPAWN_STAGGER + rand(0, 0.3),
+          rand(-1.2, 1.2),
+        )
+        .setLinearDamping(LINEAR_DAMPING)
+        .setAngularDamping(ANGULAR_DAMPING),
     )
     world.createCollider(
       RAPIER.ColliderDesc.cuboid(HALF, HALF, HALF).setRestitution(0.35).setFriction(0.7),
@@ -137,6 +159,7 @@ const total = Object.values(faces).reduce((a, b) => a + b, 0)
 const expected = total / 6
 const chi2 = Object.values(faces).reduce((sum, n) => sum + (n - expected) ** 2 / expected, 0)
 
+console.log(`graine             : ${SEED}`)
 console.log(`lancers            : ${RUNS}`)
 console.log(`dés simulés        : ${total}`)
 console.log(`lancers sans repos : ${timeouts}`)

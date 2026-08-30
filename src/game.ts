@@ -19,6 +19,9 @@ const SPAWN_MIN_Y = 2.6
 const SPAWN_STAGGER = 0.55 // décalage vertical entre deux dés d'un même lancer
 const SPAWN_MARGIN = 1.2 // écart minimal entre un dé et un mur au moment du lâcher
 
+const LINEAR_DAMPING = 0.2
+const ANGULAR_DAMPING = 0.5
+
 const FIXED_STEP = 1 / 60
 const MAX_CATCH_UP = 0.25 // rattrapage plafonné : pas de spirale après un onglet en arrière-plan
 
@@ -171,7 +174,14 @@ export class DiceGame {
       mesh.castShadow = true
       this.scene.add(mesh)
 
-      const body = this.world.createRigidBody(RigidBodyDesc.dynamic().setTranslation(0, 3, 0))
+      // L'amortissement dissipe l'énergie résiduelle : sans lui, un dé calé
+      // contre un mur ou sur un autre dé peut vibrer sans jamais s'endormir.
+      const body = this.world.createRigidBody(
+        RigidBodyDesc.dynamic()
+          .setTranslation(0, 3, 0)
+          .setLinearDamping(LINEAR_DAMPING)
+          .setAngularDamping(ANGULAR_DAMPING),
+      )
       this.world.createCollider(
         ColliderDesc.cuboid(HALF, HALF, HALF)
           .setRestitution(0.35)
