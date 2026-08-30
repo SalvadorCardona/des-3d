@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#10131a" />
+    <meta name="description" content="Un lanceur de dés 3D : touchez l'écran ou secouez l'appareil." />
+    <title>Dés 3D</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <style>
+      :root {
+        color-scheme: dark;
+        --ivory: #f5f1e6;
+        --bg: #10131a;
+      }
+      * { box-sizing: border-box; }
+      html, body { height: 100%; }
+      body {
+        margin: 0;
+        overflow: hidden;
+        background: var(--bg);
+        color: var(--ivory);
+        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      #stage { position: fixed; inset: 0; }
+      #stage canvas { display: block; }
+
+      #score {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: calc(96px + env(safe-area-inset-bottom));
+        text-align: center;
+        pointer-events: none;
+      }
+      #total { font-size: 56px; font-weight: 700; line-height: 1; }
+      #detail { font-size: 16px; opacity: 0.65; min-height: 22px; margin-top: 6px; }
+
+      .ui { pointer-events: auto; }
+
+      #controls {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: calc(20px + env(safe-area-inset-bottom));
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        padding: 0 12px;
+      }
+      button {
+        font: inherit;
+        font-size: 15px;
+        color: var(--ivory);
+        background: rgba(245, 241, 230, 0.08);
+        border: 1px solid rgba(245, 241, 230, 0.18);
+        border-radius: 10px;
+        padding: 10px 14px;
+        min-width: 44px;
+        min-height: 44px;
+        cursor: pointer;
+      }
+      button.is-active { background: rgba(245, 241, 230, 0.22); border-color: rgba(245, 241, 230, 0.5); }
+      button:focus-visible { outline: 2px solid var(--ivory); outline-offset: 2px; }
+
+      #panel {
+        position: fixed;
+        top: calc(16px + env(safe-area-inset-top));
+        right: 16px;
+        width: 148px;
+        max-height: 45vh;
+        overflow-y: auto;
+        font-size: 13px;
+        opacity: 0.8;
+      }
+      #panel h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.6; margin: 0 0 6px; }
+      #history-list { list-style: none; margin: 0 0 8px; padding: 0; }
+      #history-list li { padding: 2px 0; border-bottom: 1px solid rgba(245, 241, 230, 0.08); }
+      #clear-history { font-size: 12px; padding: 6px 10px; min-height: 0; }
+      [hidden] { display: none !important; }
+    </style>
+  </head>
+  <body>
+    <main id="stage" aria-label="Table de jeu"></main>
+
+    <div id="score" role="status" aria-live="polite">
+      <div id="total">…</div>
+      <div id="detail"></div>
+    </div>
+
+    <nav id="controls" class="ui" aria-label="Commandes">
+      <span aria-hidden="true" style="opacity: 0.6; font-size: 14px">Dés</span>
+      <button type="button" data-dice="1">1</button>
+      <button type="button" data-dice="2" class="is-active">2</button>
+      <button type="button" data-dice="3">3</button>
+      <button type="button" data-dice="4">4</button>
+      <button type="button" data-dice="5">5</button>
+      <button type="button" data-dice="6">6</button>
+      <button type="button" id="enable-shake" hidden>Activer la secousse</button>
+      <span id="counter" hidden>2</span>
+    </nav>
+
+    <aside id="panel" class="ui">
+      <h2>Historique</h2>
+      <ul id="history-list"></ul>
+      <button type="button" id="clear-history" hidden>Effacer</button>
+    </aside>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
