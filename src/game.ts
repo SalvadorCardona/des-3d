@@ -19,6 +19,8 @@ const SPAWN_MIN_Y = 2.6
 const SPAWN_STAGGER = 0.55 // décalage vertical entre deux dés d'un même lancer
 const SPAWN_MARGIN = 1.2 // écart minimal entre un dé et un mur au moment du lâcher
 
+const LOAD_ATTEMPTS = 3
+
 const LINEAR_DAMPING = 0.2
 const ANGULAR_DAMPING = 0.5
 
@@ -115,8 +117,18 @@ export class DiceGame {
 
   /** Charge Rapier à la demande, puis crée le monde, le tapis et les dés. */
   async start(): Promise<void> {
-    const mod = await import('@dimforge/rapier3d-compat')
-    const rapier = mod.default
+    // Le module pèse quelques mégaoctets : sur un réseau capricieux ou un CDN
+    // qui vient de se réchauffer, le premier téléchargement échoue parfois.
+    let rapier: typeof RAPIER
+    for (let attempt = 1; ; attempt++) {
+      try {
+        rapier = (await import('@dimforge/rapier3d-compat')).default
+        break
+      } catch (error) {
+        if (attempt >= LOAD_ATTEMPTS) throw error
+        await new Promise((resolve) => setTimeout(resolve, 500 * attempt))
+      }
+    }
     await rapier.init()
 
     this.rapier = rapier

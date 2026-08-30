@@ -79,7 +79,15 @@ if (navigator.maxTouchPoints > 0) {
 
 renderHistory()
 game.start().catch((error) => {
+  // Un module qui n'a pas pu être téléchargé reste en échec dans le navigateur :
+  // seul un rechargement de la page permet de repartir.
   total.textContent = '!'
-  detail.textContent = 'Physique indisponible'
+  detail.replaceChildren('Le moteur physique n\u2019a pas pu se charger. ')
+  const retry = document.createElement('button')
+  retry.type = 'button'
+  retry.textContent = 'Réessayer'
+  retry.addEventListener('click', () => location.reload())
+  detail.append(retry)
+  detail.classList.add('ui')
   console.error(error)
 })
