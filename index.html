@@ -95,14 +95,13 @@
 
     <nav id="controls" class="ui" aria-label="Commandes">
       <span aria-hidden="true" style="opacity: 0.6; font-size: 14px">Dés</span>
-      <button type="button" data-dice="1">1</button>
-      <button type="button" data-dice="2" class="is-active">2</button>
-      <button type="button" data-dice="3">3</button>
-      <button type="button" data-dice="4">4</button>
-      <button type="button" data-dice="5">5</button>
-      <button type="button" data-dice="6">6</button>
+      <button type="button" data-dice="1" aria-pressed="false">1</button>
+      <button type="button" data-dice="2" aria-pressed="true" class="is-active">2</button>
+      <button type="button" data-dice="3" aria-pressed="false">3</button>
+      <button type="button" data-dice="4" aria-pressed="false">4</button>
+      <button type="button" data-dice="5" aria-pressed="false">5</button>
+      <button type="button" data-dice="6" aria-pressed="false">6</button>
       <button type="button" id="enable-shake" hidden>Activer la secousse</button>
-      <span id="counter" hidden>2</span>
     </nav>
 
     <aside id="panel" class="ui">

@@ -17,3 +17,8 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm run build
+      # Rejoue 2000 lancers hors navigateur : aucun dé bloqué, aucun dé hors du
+      # tapis, et les six faces équiprobables au test du khi-deux.
+      - run: npm run verify
+        env:
+          RUNS: 2000

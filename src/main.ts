@@ -7,7 +7,6 @@ const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as 
 const stage = $('stage')
 const total = $('total')
 const detail = $('detail')
-const counter = $('counter')
 const historyList = $<HTMLUListElement>('history-list')
 const clearButton = $<HTMLButtonElement>('clear-history')
 const shakeButton = $<HTMLButtonElement>('enable-shake')
@@ -44,13 +43,14 @@ addEventListener('pointerdown', (e) => {
   game.roll()
 })
 
-for (const button of document.querySelectorAll<HTMLButtonElement>('[data-dice]')) {
+const diceButtons = document.querySelectorAll<HTMLButtonElement>('[data-dice]')
+for (const button of diceButtons) {
   button.addEventListener('click', () => {
-    const n = Number(button.dataset.dice)
-    game.setCount(n)
-    counter.textContent = String(n)
-    for (const b of document.querySelectorAll<HTMLButtonElement>('[data-dice]')) {
-      b.classList.toggle('is-active', b === button)
+    game.setCount(Number(button.dataset.dice))
+    for (const other of diceButtons) {
+      const active = other === button
+      other.classList.toggle('is-active', active)
+      other.setAttribute('aria-pressed', String(active))
     }
   })
 }
@@ -60,18 +60,21 @@ clearButton.addEventListener('click', () => {
   renderHistory()
 })
 
-if (shakeNeedsPermission()) {
-  shakeButton.hidden = false
-  shakeButton.addEventListener('click', async () => {
-    if (await requestShakePermission()) {
-      shakeButton.hidden = true
-      listenForShake((force) => game.roll(force))
-    } else {
-      shakeButton.textContent = 'Secousse refusée'
-    }
-  })
-} else {
-  listenForShake((force) => game.roll(force))
+// La secousse n'a de sens que sur un appareil qu'on peut secouer.
+if (navigator.maxTouchPoints > 0) {
+  if (shakeNeedsPermission()) {
+    shakeButton.hidden = false
+    shakeButton.addEventListener('click', async () => {
+      if (await requestShakePermission()) {
+        shakeButton.hidden = true
+        listenForShake((force) => game.roll(force))
+      } else {
+        shakeButton.textContent = 'Secousse refusée'
+      }
+    })
+  } else {
+    listenForShake((force) => game.roll(force))
+  }
 }
 
 renderHistory()

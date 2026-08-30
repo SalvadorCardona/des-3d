@@ -10,7 +10,8 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "build:native": "tsc --noEmit && CAP_BUILD=1 vite build && cap sync",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "verify": "node scripts/verify-physics.mts"
   },
   "dependencies": {
     "@capacitor/core": "^8.5.0",
